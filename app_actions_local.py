@@ -1,12 +1,13 @@
+import streamlit as st
+st.set_page_config(page_title="Ham Rhythm Local", layout="centered")
 
 """app_actions_local.py
-Local assets version (offline-safe) – Wake / Walk / Eat / Sleep rhythm game.
+Local assets version (offline‑safe) – Wake / Walk / Eat / Sleep rhythm game.
 Lv15–18: 8 actions, Lv19–20: 9 actions, Reverse boss every 5 levels, hard cap Lv20.
 """
 
 import os, random, time, base64, uuid
 from datetime import date
-import streamlit as st
 
 # Configuration
 LIVES_MAX = 3
@@ -70,8 +71,7 @@ def local_audio(path):
         data = base64.b64encode(open(path, "rb").read()).decode()
         st.audio(f"data:audio/wav;base64,{data}", format="audio/wav")
 
-# UI Header
-st.set_page_config(page_title="Ham Rhythm Local", layout="centered")
+# UI Header is already set_page_config at top
 st.title("🐹 アクションリズム・ローカル版 (Lv20)")
 
 c1, c2, c3, c4 = st.columns([1, 1, 2, 1])
@@ -126,7 +126,6 @@ elif st.session_state.stage == "guess":
 elif st.session_state.stage == "result":
     target = st.session_state.seq[::-1] if is_boss() else st.session_state.seq
     success = st.session_state.guess == target
-    # DDA update
     acc = sum(a == b for a, b in zip(st.session_state.guess, target)) / len(target)
     st.session_state.diff = max(-1, min(1, st.session_state.diff + (acc - 0.5) * 0.4))
     if success:
@@ -136,7 +135,6 @@ elif st.session_state.stage == "result":
         st.error("❌ Miss! Correct: " + " → ".join(target))
         st.session_state.lives -= 1
 
-    # Branches
     if st.session_state.lives == 0:
         st.error(f"Game Over – Reached Lv {st.session_state.level}")
         if st.button("Restart", key=uid()):
