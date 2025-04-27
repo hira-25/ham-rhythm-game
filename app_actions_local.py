@@ -1,5 +1,13 @@
 import streamlit as st
-st.set_page_config(page_title="🐹 Action Rhythm Local", layout="centered")
+st.set_page_config(page_title="🐹 Action Rhythm", layout="centered")
+
+# ───────────────────────────────────────────────────────────
+# app_actions_local_game.py
+# Offline-safe “Wake / Walk / Eat / Sleep” リズムゲーム 本番版
+# ・Lv15–18: 8アクション / Lv19–20: 9アクション
+# ・5レベルごと逆再生ボス / 最大Lv20
+# ・ローカル assets/ から画像・音声を読み込む
+# ───────────────────────────────────────────────────────────
 
 import os, random, time, base64, uuid
 from datetime import date
@@ -46,8 +54,8 @@ def play_sound(path: str):
 def safe_rerun():
     try:
         st.experimental_rerun()
-    except AttributeError:
-        return
+    except:
+        pass
 
 # ─── リソース読み込み ─────────────────
 ACTIONS = {
@@ -75,7 +83,7 @@ if st.session_state.today != today:
     st.session_state.today_level = 0
 
 # ─── UI ヘッダー ────────────────────
-st.title("🐹 アクションリズム・ローカル版 (Lv20)")
+st.title("🐹 Action Rhythm (Local Lv20)")
 c1, c2, c3, c4 = st.columns([1, 1, 2, 1])
 c1.markdown(f"❤️ {st.session_state.lives}/{LIVES_MAX}")
 c2.markdown(
@@ -87,7 +95,7 @@ c3.progress(
     text=f"Round {st.session_state.round}/{ROUNDS_PER_LEVEL}"
 )
 c4.markdown(
-    f"Diff {st.session_state.diff:+.1f}" + 
+    f"Diff {st.session_state.diff:+.1f}" +
     (" 🔄Reverse" if is_boss(st.session_state.level) else "")
 )
 
@@ -102,6 +110,7 @@ with st.sidebar:
 # ─── ゲームフロー ───────────────────
 if st.session_state.stage == "start":
     if st.button("▶️ Start", key="start_btn"):
+        # シーケンス生成
         st.session_state.seq = random.choices(
             list(ACTIONS), k=seq_len(st.session_state.level)
         )
@@ -111,20 +120,20 @@ if st.session_state.stage == "start":
 elif st.session_state.stage == "show":
     if is_boss(st.session_state.level):
         st.info("🎵 Reverse order!")
-    placeholder = st.empty()
+    ph = st.empty()
     for act in st.session_state.seq:
-        placeholder.image(ACTIONS[act], width=200, caption=act)
+        ph.image(ACTIONS[act], width=200, caption=act)
         play_sound(CLICK_SOUND)
         time.sleep(play_speed(
             st.session_state.level, st.session_state.diff
         ))
-    placeholder.empty()
+    ph.empty()
     st.session_state.stage = "guess"
     safe_rerun()
 
 elif st.session_state.stage == "guess":
     st.write(
-        "📝 Tap actions" + 
+        "📝 Tap actions" +
         (" (Reverse)" if is_boss(st.session_state.level) else "")
     )
     for act in ACTIONS:
@@ -144,9 +153,9 @@ elif st.session_state.stage == "result":
     )
     success = st.session_state.guess == target
 
-    # DDA 更新
-    accuracy = sum(a == b for a, b in zip(st.session_state.guess, target)) / len(target)
-    st.session_state.diff = max(-1, min(1, st.session_state.diff + (accuracy - 0.5) * 0.4))
+    # 難易度調整
+    acc = sum(a == b for a, b in zip(st.session_state.guess, target)) / len(target)
+    st.session_state.diff = max(-1, min(1, st.session_state.diff + (acc - 0.5) * 0.4))
 
     if success:
         st.success("✅ Round Clear!")
@@ -155,7 +164,7 @@ elif st.session_state.stage == "result":
         st.error("❌ Miss! Correct: " + " → ".join(target))
         st.session_state.lives -= 1
 
-    # 分岐
+    # 分岐処理
     if st.session_state.lives == 0:
         st.error(f"Game Over – Lv {st.session_state.level}")
         if st.button("🔄 Restart", key="restart_btn"):
@@ -181,11 +190,10 @@ elif st.session_state.stage == "result":
                 st.session_state.stage = "start"
                 safe_rerun()
         else:
-            st.success("🎉 Completed all 20 levels!")
+            st.success("🎉 完全クリア！")
 
     else:
         if st.button("▶️ Next Round", key="round_btn"):
             st.session_state.guess.clear()
             st.session_state.stage = "show"
             safe_rerun()
-
