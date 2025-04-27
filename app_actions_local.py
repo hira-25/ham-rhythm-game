@@ -1,11 +1,6 @@
 import streamlit as st
 st.set_page_config(page_title="Ham Rhythm Local", layout="centered")
 
-"""app_actions_local_refactored.py
-Offline‑safe Action Rhythm Game (Wake / Walk / Eat / Sleep)
-Lv15–18: 8 actions, Lv19–20: 9 actions, Reverse boss every 5 levels, cap Lv20.
-Refactored for readability and robustness based on code‑review feedback.
-"""
 
 # ────── Imports ──────
 import os
