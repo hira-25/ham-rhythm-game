@@ -1,0 +1,30 @@
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# VSCode settings
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Pygame cache
+pygame_cache/
+
+# Streamlit
+.streamlit/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
